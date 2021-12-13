@@ -46,6 +46,7 @@ type ElfHeaderInfo struct {
 	Data    string
 	Version uint8
 	Type    string
+	Machine string
 }
 
 type ElfType int
@@ -56,6 +57,17 @@ const (
 	Exec
 	Dyn
 	Core
+)
+
+type ElfMachine int
+
+const (
+	Nonemachine ElfMachine = 0
+	Sparc       ElfMachine = 2
+	I386        ElfMachine = 3
+	Sparc32plus ElfMachine = 18
+	Sparcv9     ElfMachine = 43
+	X8684       ElfMachine = 62
 )
 
 func setClass(info ElfHeaderInfo, c ElfClass) ElfHeaderInfo {
@@ -93,9 +105,26 @@ func setType(info ElfHeaderInfo, o ElfType) ElfHeaderInfo {
 		info.Type = "An executable file"
 	case Dyn:
 		info.Type = "A shared object"
-
 	case Core:
 		info.Type = "A core file"
+	}
+	return info
+}
+
+func setMachine(info ElfHeaderInfo, m ElfMachine) ElfHeaderInfo {
+	switch m {
+	case Nonemachine:
+		info.Machine = "An unkown machine"
+	case Sparc:
+		info.Machine = "Sun Microsystems SPARC"
+	case I386:
+		info.Machine = "Intel 80386"
+	case Sparc32plus:
+		info.Machine = "SPARC with enhanced instruction set"
+	case Sparcv9:
+		info.Machine = "SPARC v9 64-bit"
+	case X8684:
+		info.Machine = "AMD x86-64"
 	}
 	return info
 }
@@ -132,6 +161,12 @@ func ReadHeader(file []byte) (ElfHeaderInfo, error) {
 		return info, err2
 	}
 	info = setType(info, ElfType(header.e_type))
+
+	err3 := binary.Read(buf, order, &header.e_machine)
+	if err3 != nil {
+		return info, err3
+	}
+	info = setMachine(info, ElfMachine(header.e_machine))
 
 	return info, nil
 }

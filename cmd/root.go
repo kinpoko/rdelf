@@ -43,6 +43,7 @@ var rootCmd = &cobra.Command{
 		fmt.Println("Data: " + r.Data)
 		fmt.Printf("Version: %x\n", r.Version)
 		fmt.Println("Type: " + r.Type)
+		fmt.Println("Machine: " + r.Machine)
 
 		return nil
 
