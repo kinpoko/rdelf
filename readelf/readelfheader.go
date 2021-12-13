@@ -7,21 +7,38 @@ import (
 	"unsafe"
 )
 
+type elfHeaderMagic struct {
+	E_dent [16]uint8 /* Magic number and other info */
+}
+
 type elfHeader struct {
-	e_dent      [16]uint8 /* Magic number and other info */
-	e_type      uint16    /* Object file type */
-	e_machine   uint16    /* Architecture */
-	e_version   uint32    /* Object file version */
-	e_entry     uint64    /* Entry point virtual address */
-	e_phoff     uint64    /* Program header table file offset */
-	e_shoff     uint64    /* Section header table file offset */
-	e_flags     uint32    /* Processor-specific flags */
-	e_ehsize    uint16    /* ELF header size in bytes */
-	e_phentsize uint16    /* Program header table entry size */
-	e_phnum     uint16    /* Program header table entry count */
-	e_shentsize uint16    /* Section header table entry size */
-	e_shnum     uint16    /* Section header table entry count */
-	e_shstrndx  uint16    /* Section header string table index */
+	E_type      uint16 /* Object file type */
+	E_machine   uint16 /* Architecture */
+	E_version   uint32 /* Object file version */
+	E_entry     uint64 /* Entry point virtual address */
+	E_phoff     uint64 /* Program header table file offset */
+	E_shoff     uint64 /* Section header table file offset */
+	E_flags     uint32 /* Processor-specific flags */
+	E_ehsize    uint16 /* ELF header size in bytes */
+	E_phentsize uint16 /* Program header table entry size */
+	E_phnum     uint16 /* Program header table entry count */
+	E_shentsize uint16 /* Section header table entry size */
+	E_shnum     uint16 /* Section header table entry count */
+	E_shstrndx  uint16 /* Section header string table index */
+}
+
+type ElfHeaderInfo struct {
+	Magic       [16]uint8
+	Class       string
+	Data        string
+	Version     uint8
+	Type        string
+	Machine     string
+	EntryPoint  uint64
+	StartPH     uint64
+	StartSH     uint64
+	HeaderSize  uint16
+	PHeaderSize uint16
 }
 
 type ElfClass int
@@ -39,15 +56,6 @@ const (
 	Littleendian ElfData = 1
 	Bigendian    ElfData = 2
 )
-
-type ElfHeaderInfo struct {
-	Magic   [16]uint8
-	Class   string
-	Data    string
-	Version uint8
-	Type    string
-	Machine string
-}
 
 type ElfType int
 
@@ -130,43 +138,49 @@ func setMachine(info ElfHeaderInfo, m ElfMachine) ElfHeaderInfo {
 }
 
 func ReadHeader(file []byte) (ElfHeaderInfo, error) {
-
-	var header elfHeader
+	var magicnum elfHeaderMagic
 	var info ElfHeaderInfo
 
-	s := unsafe.Sizeof(header)
-	h := make([]byte, s)
-	copy(h, file[:s])
-
-	buf := bytes.NewReader(h)
-
-	err1 := binary.Read(buf, binary.BigEndian, &header.e_dent)
+	sm := unsafe.Sizeof(magicnum)
+	m := make([]byte, sm)
+	copy(m, file[:sm])
+	bufm := bytes.NewReader(m)
+	err1 := binary.Read(bufm, binary.BigEndian, &magicnum)
 	if err1 != nil {
 		return info, err1
 	}
-	copy(info.Magic[:], header.e_dent[:])
-	info = setClass(info, ElfClass(header.e_dent[4]))
-	info = setData(info, ElfData(header.e_dent[5]))
-	info.Version = header.e_dent[6]
+	copy(info.Magic[:], magicnum.E_dent[:])
+	info = setClass(info, ElfClass(magicnum.E_dent[4]))
+	info = setData(info, ElfData(magicnum.E_dent[5]))
 
 	var order binary.ByteOrder
-	if header.e_dent[5] == 1 {
+	if magicnum.E_dent[5] == 1 {
 		order = binary.LittleEndian
 	} else {
 		order = binary.BigEndian
 	}
+	info.Version = magicnum.E_dent[6]
 
-	err2 := binary.Read(buf, order, &header.e_type)
+	var header elfHeader
+
+	sh := unsafe.Sizeof(header)
+	h := make([]byte, sh)
+	copy(h, file[sm:])
+
+	bufh := bytes.NewReader(h)
+
+	err2 := binary.Read(bufh, order, &header)
 	if err2 != nil {
-		return info, err2
+		return info, err1
 	}
-	info = setType(info, ElfType(header.e_type))
 
-	err3 := binary.Read(buf, order, &header.e_machine)
-	if err3 != nil {
-		return info, err3
-	}
-	info = setMachine(info, ElfMachine(header.e_machine))
+	info = setType(info, ElfType(header.E_type))
+	info = setMachine(info, ElfMachine(header.E_machine))
+	info.EntryPoint = header.E_entry
+	info.StartPH = header.E_phoff
+	info.StartSH = header.E_shoff
+	info.HeaderSize = header.E_ehsize
+	info.PHeaderSize = header.E_phentsize
 
 	return info, nil
 }
