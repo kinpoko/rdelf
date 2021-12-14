@@ -28,27 +28,38 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		r, err := readelf.ReadHeader(b)
+		h, err := readelf.ReadELFHeader(b)
 		if err != nil {
 			return err
 		}
 
 		fmt.Print("Magic: ")
-		for _, n := range r.Magic {
+		for _, n := range h.Magic {
 			fmt.Printf("%x ", n)
 		}
 		fmt.Printf("\n")
 
-		fmt.Println("Class: " + r.Class)
-		fmt.Println("Data: " + r.Data)
-		fmt.Printf("Version: %x\n", r.Version)
-		fmt.Println("Type: " + r.Type)
-		fmt.Println("Machine: " + r.Machine)
-		fmt.Printf("EntryPoint: 0x%x\n", r.EntryPoint)
-		fmt.Printf("Start of Program headers: %d (bytes)\n", r.StartOfPHeader)
-		fmt.Printf("Start of Section headers: %d (bytes)\n", r.StartOfSHeader)
-		fmt.Printf("Number of Program headers: %d \n", r.NumOfPHeader)
-		fmt.Printf("Number of Section headers: %d \n", r.NumOfSHeader)
+		fmt.Println("Class: " + h.Class)
+		fmt.Println("Data: " + h.Data)
+		fmt.Printf("Version: %x\n", h.Version)
+		fmt.Println("Type: " + h.Type)
+		fmt.Println("Machine: " + h.Machine)
+		fmt.Printf("EntryPoint: 0x%x\n", h.EntryPoint)
+		fmt.Printf("Start of Program headers: %d (bytes)\n", h.StartOfPHeader)
+		fmt.Printf("Start of Section headers: %d (bytes)\n", h.StartOfSHeader)
+		fmt.Printf("Number of Program headers: %d \n", h.NumOfPHeader)
+		fmt.Printf("Number of Section headers: %d \n", h.NumOfSHeader)
+		fmt.Printf("\n")
+
+		ph, err := readelf.ReadProgramHeader(b, h.StartOfPHeader, h.NumOfPHeader, h.SizeOfPHeader)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Program Headers:")
+		fmt.Println("Type: " + ph.Type)
+		fmt.Println("Flags: " + ph.Flags)
+
 		return nil
 
 	},

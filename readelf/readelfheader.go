@@ -37,7 +37,9 @@ type ElfHeaderInfo struct {
 	EntryPoint     uint64
 	StartOfPHeader uint64
 	StartOfSHeader uint64
+	SizeOfPHeader  uint16
 	NumOfPHeader   uint16
+	SizeOfSHeader  uint16
 	NumOfSHeader   uint16
 }
 
@@ -137,15 +139,15 @@ func setMachine(info ElfHeaderInfo, m ElfMachine) ElfHeaderInfo {
 	return info
 }
 
-func ReadHeader(file []byte) (ElfHeaderInfo, error) {
+func ReadELFHeader(file []byte) (ElfHeaderInfo, error) {
 	var magicnum elfHeaderMagic
 	var info ElfHeaderInfo
 
-	sm := unsafe.Sizeof(magicnum)
-	m := make([]byte, sm)
-	copy(m, file[:sm])
-	bufm := bytes.NewReader(m)
-	err1 := binary.Read(bufm, binary.BigEndian, &magicnum)
+	ms := unsafe.Sizeof(magicnum)
+	m := make([]byte, ms)
+	copy(m, file[:ms])
+	mr := bytes.NewReader(m)
+	err1 := binary.Read(mr, binary.BigEndian, &magicnum)
 	if err1 != nil {
 		return info, err1
 	}
@@ -165,11 +167,11 @@ func ReadHeader(file []byte) (ElfHeaderInfo, error) {
 
 	sh := unsafe.Sizeof(header)
 	h := make([]byte, sh)
-	copy(h, file[sm:])
+	copy(h, file[ms:])
 
-	bufh := bytes.NewReader(h)
+	hr := bytes.NewReader(h)
 
-	err2 := binary.Read(bufh, order, &header)
+	err2 := binary.Read(hr, order, &header)
 	if err2 != nil {
 		return info, err1
 	}
@@ -179,7 +181,10 @@ func ReadHeader(file []byte) (ElfHeaderInfo, error) {
 	info.EntryPoint = header.E_entry
 	info.StartOfPHeader = header.E_phoff
 	info.StartOfSHeader = header.E_shoff
+	info.SizeOfPHeader = header.E_phentsize
 	info.NumOfPHeader = header.E_phnum
+	info.SizeOfSHeader = header.E_shentsize
 	info.NumOfSHeader = header.E_shnum
 	return info, nil
+
 }
