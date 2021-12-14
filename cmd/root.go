@@ -45,10 +45,10 @@ var rootCmd = &cobra.Command{
 		fmt.Println("Type: " + r.Type)
 		fmt.Println("Machine: " + r.Machine)
 		fmt.Printf("EntryPoint: 0x%x\n", r.EntryPoint)
-		fmt.Printf("Start of Program headers: %d (bytes)\n", r.StartPH)
-		fmt.Printf("Start of Section headers: %d (bytes)\n", r.StartSH)
-		fmt.Printf("Size of this header: %d (bytes)\n", r.HeaderSize)
-		fmt.Printf("Size of program headers: %d (bytes)\n", r.PHeaderSize)
+		fmt.Printf("Start of Program headers: %d (bytes)\n", r.StartOfPHeader)
+		fmt.Printf("Start of Section headers: %d (bytes)\n", r.StartOfSHeader)
+		fmt.Printf("Number of Program headers: %d \n", r.NumOfPHeader)
+		fmt.Printf("Number of Section headers: %d \n", r.NumOfSHeader)
 		return nil
 
 	},

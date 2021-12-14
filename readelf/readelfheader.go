@@ -28,17 +28,17 @@ type elfHeader struct {
 }
 
 type ElfHeaderInfo struct {
-	Magic       [16]uint8
-	Class       string
-	Data        string
-	Version     uint8
-	Type        string
-	Machine     string
-	EntryPoint  uint64
-	StartPH     uint64
-	StartSH     uint64
-	HeaderSize  uint16
-	PHeaderSize uint16
+	Magic          [16]uint8
+	Class          string
+	Data           string
+	Version        uint8
+	Type           string
+	Machine        string
+	EntryPoint     uint64
+	StartOfPHeader uint64
+	StartOfSHeader uint64
+	NumOfPHeader   uint16
+	NumOfSHeader   uint16
 }
 
 type ElfClass int
@@ -177,10 +177,9 @@ func ReadHeader(file []byte) (ElfHeaderInfo, error) {
 	info = setType(info, ElfType(header.E_type))
 	info = setMachine(info, ElfMachine(header.E_machine))
 	info.EntryPoint = header.E_entry
-	info.StartPH = header.E_phoff
-	info.StartSH = header.E_shoff
-	info.HeaderSize = header.E_ehsize
-	info.PHeaderSize = header.E_phentsize
-
+	info.StartOfPHeader = header.E_phoff
+	info.StartOfSHeader = header.E_shoff
+	info.NumOfPHeader = header.E_phnum
+	info.NumOfSHeader = header.E_shnum
 	return info, nil
 }
