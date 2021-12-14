@@ -77,9 +77,9 @@ func setPHFlags(info ProgramHeaderInfo, f PHFlags) ProgramHeaderInfo {
 
 func ReadProgramHeader(file []byte, phoff uint64, phnum uint16, phsize uint16) (ProgramHeaderInfo, error) {
 	var info ProgramHeaderInfo
-	eheader, err1 := ReadELFHeader(file)
-	if err1 != nil {
-		return info, err1
+	eheader, err := ReadELFHeader(file)
+	if err != nil {
+		return info, err
 	}
 
 	var order binary.ByteOrder
@@ -94,9 +94,9 @@ func ReadProgramHeader(file []byte, phoff uint64, phnum uint16, phsize uint16) (
 	ph := make([]byte, phs)
 	copy(ph, file[int(phoff):])
 	phr := bytes.NewReader(ph)
-	err2 := binary.Read(phr, order, &pheader)
-	if err2 != nil {
-		return info, err2
+	err = binary.Read(phr, order, &pheader)
+	if err != nil {
+		return info, err
 	}
 	info = setPHtype(info, PHType(pheader.P_type))
 	info = setPHFlags(info, PHFlags(pheader.P_flags))

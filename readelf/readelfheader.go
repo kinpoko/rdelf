@@ -147,9 +147,9 @@ func ReadELFHeader(file []byte) (ElfHeaderInfo, error) {
 	m := make([]byte, ms)
 	copy(m, file[:ms])
 	mr := bytes.NewReader(m)
-	err1 := binary.Read(mr, binary.BigEndian, &magicnum)
-	if err1 != nil {
-		return info, err1
+	err := binary.Read(mr, binary.BigEndian, &magicnum)
+	if err != nil {
+		return info, err
 	}
 	copy(info.Magic[:], magicnum.E_dent[:])
 	info = setClass(info, ElfClass(magicnum.E_dent[4]))
@@ -171,9 +171,9 @@ func ReadELFHeader(file []byte) (ElfHeaderInfo, error) {
 
 	hr := bytes.NewReader(h)
 
-	err2 := binary.Read(hr, order, &header)
-	if err2 != nil {
-		return info, err1
+	err = binary.Read(hr, order, &header)
+	if err != nil {
+		return info, err
 	}
 
 	info = setType(info, ElfType(header.E_type))
