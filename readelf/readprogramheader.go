@@ -28,17 +28,17 @@ type ProgramHeaderInfo struct {
 	MSize  uint64
 }
 
-type ProgramHeadersInfos []ProgramHeaderInfo
+type ProgramHeaderInfos []ProgramHeaderInfo
 
 type PHType uint32
 
 const (
-	Null         PHType = 0
+	PNull        PHType = 0
 	Load         PHType = 1
 	Dynamic      PHType = 2
 	Interp       PHType = 3
 	Note         PHType = 4
-	Shlib        PHType = 5
+	PShlib       PHType = 5
 	Phdr         PHType = 6
 	Tls          PHType = 7
 	PNum         PHType = 8
@@ -49,7 +49,7 @@ const (
 
 func setPHtype(info ProgramHeaderInfo, t PHType) ProgramHeaderInfo {
 	switch t {
-	case Null:
+	case PNull:
 		info.Type = "NULL"
 	case Load:
 		info.Type = "LOAD"
@@ -59,7 +59,7 @@ func setPHtype(info ProgramHeaderInfo, t PHType) ProgramHeaderInfo {
 		info.Type = "INTERP"
 	case Note:
 		info.Type = "NOTE"
-	case Shlib:
+	case PShlib:
 		info.Type = "SHLIB"
 	case Phdr:
 		info.Type = "PHDR"
@@ -73,6 +73,8 @@ func setPHtype(info ProgramHeaderInfo, t PHType) ProgramHeaderInfo {
 		info.Type = "GNU_STACK"
 	case Gnu_relro:
 		info.Type = "GNU_RELRO"
+	default:
+		info.Type = "Unknown"
 	}
 	return info
 }
@@ -104,8 +106,8 @@ func setPHFlags(info ProgramHeaderInfo, f PHFlags) ProgramHeaderInfo {
 	return info
 }
 
-func ReadProgramHeader(file []byte, phoff uint64, phnum uint16, phsize uint16) (ProgramHeadersInfos, error) {
-	var infos ProgramHeadersInfos
+func ReadProgramHeaders(file []byte, phoff uint64, phnum uint16, phsize uint16) (ProgramHeaderInfos, error) {
+	var infos ProgramHeaderInfos
 	eheader, err := ReadELFHeader(file)
 	if err != nil {
 		return infos, err

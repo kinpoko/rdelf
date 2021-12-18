@@ -51,7 +51,7 @@ var rootCmd = &cobra.Command{
 		fmt.Printf("Number of Section headers: %d \n", h.NumOfSHeader)
 		fmt.Printf("\n")
 
-		phs, err := readelf.ReadProgramHeader(b, h.StartOfPHeader, h.NumOfPHeader, h.SizeOfPHeader)
+		phs, err := readelf.ReadProgramHeaders(b, h.StartOfPHeader, h.NumOfPHeader, h.SizeOfPHeader)
 		if err != nil {
 			return err
 		}
@@ -65,6 +65,14 @@ var rootCmd = &cobra.Command{
 			fmt.Printf("FileSize: 0x%x\n", ph.FSize)
 			fmt.Printf("MemSize: 0x%x\n", ph.MSize)
 			fmt.Print("\n")
+		}
+		shs, err := readelf.ReadSectionHeaders(b, h.StartOfSHeader, h.NumOfSHeader, h.SizeOfSHeader)
+		if err != nil {
+			return err
+		}
+		for i, sh := range shs {
+			fmt.Printf("Section Headers[%d]:\n", i)
+			fmt.Println("Type: " + sh.Type)
 		}
 
 		return nil
