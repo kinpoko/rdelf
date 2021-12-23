@@ -90,6 +90,8 @@ func setClass(info ElfHeaderInfo, c ElfClass) ElfHeaderInfo {
 		info.Class = "ELF64"
 	case Num:
 		info.Class = "Num"
+	default:
+		info.Class = "Unknown"
 	}
 	return info
 }
@@ -100,6 +102,8 @@ func setData(info ElfHeaderInfo, d ElfData) ElfHeaderInfo {
 		info.Data = "little endian"
 	case Bigendian:
 		info.Data = "big endian"
+	default:
+		info.Data = "unknown"
 	}
 	return info
 
@@ -117,6 +121,8 @@ func setType(info ElfHeaderInfo, o ElfType) ElfHeaderInfo {
 		info.Type = "A shared object"
 	case Core:
 		info.Type = "A core file"
+	default:
+		info.Type = "Unknown"
 	}
 	return info
 }
@@ -135,6 +141,8 @@ func setMachine(info ElfHeaderInfo, m ElfMachine) ElfHeaderInfo {
 		info.Machine = "SPARC v9 64-bit"
 	case X8684:
 		info.Machine = "AMD x86-64"
+	default:
+		info.Machine = "Unknown"
 	}
 	return info
 }
