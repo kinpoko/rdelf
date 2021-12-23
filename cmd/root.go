@@ -33,48 +33,65 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Print("Magic: ")
-		for _, n := range h.Magic {
-			fmt.Printf("%x ", n)
-		}
-		fmt.Printf("\n")
-
-		fmt.Println("Class: " + h.Class)
-		fmt.Println("Data: " + h.Data)
-		fmt.Printf("Version: %x\n", h.Version)
-		fmt.Println("Type: " + h.Type)
-		fmt.Println("Machine: " + h.Machine)
-		fmt.Printf("EntryPoint: 0x%x\n", h.EntryPoint)
-		fmt.Printf("Start of Program headers: %d (bytes)\n", h.StartOfPHeader)
-		fmt.Printf("Start of Section headers: %d (bytes)\n", h.StartOfSHeader)
-		fmt.Printf("Number of Program headers: %d \n", h.NumOfPHeader)
-		fmt.Printf("Number of Section headers: %d \n", h.NumOfSHeader)
-		fmt.Printf("\n")
-
-		phs, err := readelf.ReadProgramHeaders(b, h.StartOfPHeader, h.NumOfPHeader, h.SizeOfPHeader)
+		hed, err := cmd.Flags().GetBool("hed")
 		if err != nil {
 			return err
 		}
-		for i, ph := range phs {
-			fmt.Printf("Program Headers[%d]:\n", i)
-			fmt.Println("Type: " + ph.Type)
-			fmt.Println("Flags: " + ph.Flags)
-			fmt.Printf("Offset: 0x%x\n", ph.Offset)
-			fmt.Printf("VirtAddr: 0x%x\n", ph.VAddr)
-			fmt.Printf("PhysAddr: 0x%x\n", ph.PAddr)
-			fmt.Printf("FileSize: 0x%x\n", ph.FSize)
-			fmt.Printf("MemSize: 0x%x\n", ph.MSize)
-			fmt.Print("\n")
+		if hed {
+
+			fmt.Print("Magic: ")
+			for _, n := range h.Magic {
+				fmt.Printf("%x ", n)
+			}
+			fmt.Printf("\n")
+			fmt.Println("Class: " + h.Class)
+			fmt.Println("Data: " + h.Data)
+			fmt.Printf("Version: %x\n", h.Version)
+			fmt.Println("Type: " + h.Type)
+			fmt.Println("Machine: " + h.Machine)
+			fmt.Printf("EntryPoint: 0x%x\n", h.EntryPoint)
+			fmt.Printf("Start of Program headers: %d (bytes)\n", h.StartOfPHeader)
+			fmt.Printf("Start of Section headers: %d (bytes)\n", h.StartOfSHeader)
+			fmt.Printf("Number of Program headers: %d \n", h.NumOfPHeader)
+			fmt.Printf("Number of Section headers: %d \n", h.NumOfSHeader)
+			fmt.Printf("\n")
 		}
-		shs, err := readelf.ReadSectionHeaders(b, h.StartOfSHeader, h.NumOfSHeader, h.SizeOfSHeader)
+
+		progh, err := cmd.Flags().GetBool("progh")
 		if err != nil {
 			return err
 		}
-		for i, sh := range shs {
-			fmt.Printf("Section Headers[%d]:\n", i)
-			fmt.Println("Type: " + sh.Type)
+		if progh {
+			phs, err := readelf.ReadProgramHeaders(b, h.StartOfPHeader, h.NumOfPHeader, h.SizeOfPHeader)
+			if err != nil {
+				return err
+			}
+			for i, ph := range phs {
+				fmt.Printf("Program Headers[%d]:\n", i)
+				fmt.Println("Type: " + ph.Type)
+				fmt.Println("Flags: " + ph.Flags)
+				fmt.Printf("Offset: 0x%x\n", ph.Offset)
+				fmt.Printf("VirtAddr: 0x%x\n", ph.VAddr)
+				fmt.Printf("PhysAddr: 0x%x\n", ph.PAddr)
+				fmt.Printf("FileSize: 0x%x\n", ph.FSize)
+				fmt.Printf("MemSize: 0x%x\n", ph.MSize)
+				fmt.Print("\n")
+			}
 		}
-
+		segh, err := cmd.Flags().GetBool("segh")
+		if err != nil {
+			return err
+		}
+		if segh {
+			shs, err := readelf.ReadSectionHeaders(b, h.StartOfSHeader, h.NumOfSHeader, h.SizeOfSHeader)
+			if err != nil {
+				return err
+			}
+			for i, sh := range shs {
+				fmt.Printf("Section Headers[%d]:\n", i)
+				fmt.Println("Type: " + sh.Type)
+			}
+		}
 		return nil
 
 	},
@@ -85,4 +102,7 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Flags().Bool("hed", false, "display elf header")
+	rootCmd.Flags().BoolP("progh", "l", false, "display program headers")
+	rootCmd.Flags().BoolP("segh", "S", false, "display section headers")
 }
