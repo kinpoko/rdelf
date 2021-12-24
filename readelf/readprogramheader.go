@@ -7,71 +7,71 @@ import (
 	"unsafe"
 )
 
-type programHeader struct {
-	P_type   uint32 /* Segment type */
-	P_flags  uint32 /* Segment flags */
-	P_offset uint64 /* Segment file offset */
-	P_vaddr  uint64 /* Segment virtual address */
-	P_paddr  uint64 /* Segment physical address */
-	P_filesz uint64 /* Segment size in file */
-	P_memsz  uint64 /* Segment size in memory */
-	P_align  uint64 /* Segment alignment, file & memory */
+type ProgramHeader struct {
+	P_type   Elf64_Word  /* Segment type */
+	P_flags  Elf64_Word  /* Segment flags */
+	P_offset Elf64_Off   /* Segment file offset */
+	P_vaddr  Elf64_Addr  /* Segment virtual address */
+	P_paddr  Elf64_Addr  /* Segment physical address */
+	P_filesz Elf64_Xword /* Segment size in file */
+	P_memsz  Elf64_Xword /* Segment size in memory */
+	P_align  Elf64_Xword /* Segment alignment, file & memory */
 }
 
 type ProgramHeaderInfo struct {
 	Type   string
 	Flags  string
-	Offset uint64
-	VAddr  uint64
-	PAddr  uint64
-	FSize  uint64
-	MSize  uint64
+	Offset Elf64_Off
+	VAddr  Elf64_Addr
+	PAddr  Elf64_Addr
+	FSize  Elf64_Xword
+	MSize  Elf64_Xword
 }
 
 type ProgramHeaderInfos []ProgramHeaderInfo
 
-type PHType uint32
+type PType uint32
 
 const (
-	PNull        PHType = 0
-	Load         PHType = 1
-	Dynamic      PHType = 2
-	Interp       PHType = 3
-	Note         PHType = 4
-	PShlib       PHType = 5
-	Phdr         PHType = 6
-	Tls          PHType = 7
-	PNum         PHType = 8
-	Gnu_eh_frame PHType = 0x6474e550
-	Gnu_stack    PHType = 0x6474e551
-	Gnu_relro    PHType = 0x6474e552
+	PT_NULL         PType = 0
+	PT_LOAD         PType = 1
+	PT_DYNAMIC      PType = 2
+	PT_INTERP       PType = 3
+	PT_NOTE         PType = 4
+	PT_SHLIB        PType = 5
+	PT_PHDR         PType = 6
+	PT_TLS          PType = 7
+	PT_NUM          PType = 8
+	PT_GNU_EH_FRAME PType = 0x6474e550
+	PT_GNU_STACK    PType = 0x6474e551
+	PT_GNU_RELRO    PType = 0x6474e552
 )
 
-func setPHtype(info ProgramHeaderInfo, t PHType) ProgramHeaderInfo {
+func setPType(info ProgramHeaderInfo, t PType) ProgramHeaderInfo {
 	switch t {
-	case PNull:
+	case PT_NULL:
 		info.Type = "NULL"
-	case Load:
+	case PT_LOAD:
 		info.Type = "LOAD"
-	case Dynamic:
+	case PT_DYNAMIC:
 		info.Type = "DYNAMIC"
-	case Interp:
+	case PT_INTERP:
 		info.Type = "INTERP"
-	case Note:
+	case PT_NOTE:
 		info.Type = "NOTE"
-	case PShlib:
+	case PT_SHLIB:
 		info.Type = "SHLIB"
-	case Phdr:
+	case PT_PHDR:
 		info.Type = "PHDR"
-	case Tls:
+	case PT_TLS:
 		info.Type = "TLS"
-	case PNum:
+	case PT_NUM:
 		info.Type = "Num"
-	case Gnu_eh_frame:
+	case PT_GNU_EH_FRAME:
 		info.Type = "GNU_EH_FRAME"
-	case Gnu_stack:
+	case PT_GNU_STACK:
 		info.Type = "GNU_STACK"
-	case Gnu_relro:
+	case PT_GNU_RELRO:
 		info.Type = "GNU_RELRO"
 	default:
 		info.Type = "Unknown"
@@ -79,15 +79,15 @@ func setPHtype(info ProgramHeaderInfo, t PHType) ProgramHeaderInfo {
 	return info
 }
 
-type PHFlags uint32
+type PFlags uint32
 
 const (
-	X PHFlags = 1
-	W PHFlags = 2
-	R PHFlags = 4
+	X PFlags = 1
+	W PFlags = 2
+	R PFlags = 4
 )
 
-func setPHFlags(info ProgramHeaderInfo, f PHFlags) ProgramHeaderInfo {
+func setPFlags(info ProgramHeaderInfo, f PFlags) ProgramHeaderInfo {
 	if R&f != 0 {
 		info.Flags += "Readable"
 	} else {
@@ -106,7 +106,7 @@ func setPHFlags(info ProgramHeaderInfo, f PHFlags) ProgramHeaderInfo {
 	return info
 }
 
-func ReadProgramHeaders(file []byte, phoff uint64, phnum uint16, phsize uint16) (ProgramHeaderInfos, error) {
+func ReadProgramHeaders(file []byte, phoff Elf64_Off, phnum Elf64_Half, phsize Elf64_Half) (ProgramHeaderInfos, error) {
 	var infos ProgramHeaderInfos
 	eheader, err := ReadELFHeader(file)
 	if err != nil {
@@ -121,7 +121,7 @@ func ReadProgramHeaders(file []byte, phoff uint64, phnum uint16, phsize uint16) 
 	}
 
 	for i := 0; i < int(phnum); i++ {
-		var pheader programHeader
+		var pheader ProgramHeader
 		var info ProgramHeaderInfo
 		phs := unsafe.Sizeof(pheader)
 		ph := make([]byte, phs)
@@ -131,8 +131,8 @@ func ReadProgramHeaders(file []byte, phoff uint64, phnum uint16, phsize uint16) 
 		if err != nil {
 			return infos, err
 		}
-		info = setPHtype(info, PHType(pheader.P_type))
-		info = setPHFlags(info, PHFlags(pheader.P_flags))
+		info = setPType(info, PType(pheader.P_type))
+		info = setPFlags(info, PFlags(pheader.P_flags))
 		info.Offset = pheader.P_offset
 		info.VAddr = pheader.P_vaddr
 		info.PAddr = pheader.P_paddr

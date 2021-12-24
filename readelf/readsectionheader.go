@@ -8,23 +8,23 @@ import (
 )
 
 type sectionHeader struct {
-	Sh_name      uint32 /* Section name (string tbl index) */
-	Sh_type      uint32 /* Section type */
-	Sh_flags     uint64 /* Section flags */
-	Sh_addr      uint64 /* Section virtual addr at execution */
-	Sh_offset    uint64 /* Section file offset */
-	Sh_size      uint64 /* Section size in bytes */
-	Sh_link      uint32 /* Link to another section */
-	Sh_info      uint32 /* Additional section information */
-	Sh_addralign uint64 /* Section alignment */
-	Sh_entsize   uint64 /* Entry size if section holds table */
+	Sh_name      Elf64_Word  /* Section name (string tbl index) */
+	Sh_type      Elf64_Word  /* Section type */
+	Sh_flags     Elf64_Xword /* Section flags */
+	Sh_addr      Elf64_Addr  /* Section virtual addr at execution */
+	Sh_offset    Elf64_Off   /* Section file offset */
+	Sh_size      Elf64_Xword /* Section size in bytes */
+	Sh_link      Elf64_Word  /* Link to another section */
+	Sh_info      Elf64_Word  /* Additional section information */
+	Sh_addralign Elf64_Xword /* Section alignment */
+	Sh_entsize   Elf64_Xword /* Entry size if section holds table */
 }
 
 type SectionHeaderInfo struct {
 	Name      string
 	Type      string
-	Size      uint64
-	EntrySize uint64
+	Size      Elf64_Xword
+	EntrySize Elf64_Xword
 }
 
 type SectionHeaderInfos []SectionHeaderInfo
@@ -32,72 +32,72 @@ type SectionHeaderInfos []SectionHeaderInfo
 type SHType uint32
 
 const (
-	SNull        SHType = 0
-	Progbits     SHType = 1
-	Symtab       SHType = 2
-	Strtab       SHType = 3
-	Rela         SHType = 4
-	Hash         SHType = 5
-	SDynamic     SHType = 6
-	SNote        SHType = 7
-	Nobits       SHType = 8
-	SRel         SHType = 9
-	SShlib       SHType = 10
-	Dynsym       SHType = 11
-	Initarray    SHType = 14
-	Finiarray    SHType = 15
-	Preinitarray SHType = 16
-	Group        SHType = 17
-	Symtabshndx  SHType = 18
-	SNum         SHType = 19
-	Gnu_hash     SHType = 0x6ffffff6
-	Gnu_verneed  SHType = 0x6ffffffe
-	Gnu_versym   SHType = 0x6fffffff
+	SHT_NULL          SHType = 0
+	SHT_PROGBITS      SHType = 1
+	SHT_SYMTAB        SHType = 2
+	SHT_STRTAB        SHType = 3
+	SHT_RELA          SHType = 4
+	SHT_HASH          SHType = 5
+	SHT_DYNAMIC       SHType = 6
+	SHT_NOTE          SHType = 7
+	SHT_NOBITS        SHType = 8
+	SHT_REL           SHType = 9
+	SHT_SHLIB         SHType = 10
+	SHT_DYNSYM        SHType = 11
+	SHT_INIT_ARRAY    SHType = 14
+	SHT_FINI_ARRAY    SHType = 15
+	SHT_PREINIT_ARRAY SHType = 16
+	SHT_GROUP         SHType = 17
+	SHT_SYMTAB_SHNDX  SHType = 18
+	SHT_NUM           SHType = 19
+	SHT_GNU_HASH      SHType = 0x6ffffff6
+	SHT_GNU_verneed   SHType = 0x6ffffffe
+	SHT_GNU_versym    SHType = 0x6fffffff
 )
 
-func setSHtype(info SectionHeaderInfo, t SHType) SectionHeaderInfo {
+func setSHType(info SectionHeaderInfo, t SHType) SectionHeaderInfo {
 	switch t {
-	case SNull:
+	case SHT_NULL:
 		info.Type = "Null"
-	case Progbits:
+	case SHT_PROGBITS:
 		info.Type = "Progbit"
-	case Symtab:
+	case SHT_SYMTAB:
 		info.Type = "Symtab"
-	case Strtab:
+	case SHT_STRTAB:
 		info.Type = "Strtab"
-	case Rela:
+	case SHT_RELA:
 		info.Type = "Rela"
-	case Hash:
+	case SHT_HASH:
 		info.Type = "Hash"
-	case SDynamic:
+	case SHT_DYNAMIC:
 		info.Type = "Dynamic"
-	case SNote:
+	case SHT_NOTE:
 		info.Type = "Note"
-	case Nobits:
+	case SHT_NOBITS:
 		info.Type = "Nobits"
-	case SRel:
+	case SHT_REL:
 		info.Type = "Rel"
-	case SShlib:
+	case SHT_SHLIB:
 		info.Type = "Shlib"
-	case Dynsym:
+	case SHT_DYNSYM:
 		info.Type = "Dynsym"
-	case Initarray:
+	case SHT_INIT_ARRAY:
 		info.Type = "Initarray"
-	case Finiarray:
+	case SHT_FINI_ARRAY:
 		info.Type = "Finiarray"
-	case Preinitarray:
+	case SHT_PREINIT_ARRAY:
 		info.Type = "Preinitarray"
-	case Group:
+	case SHT_GROUP:
 		info.Type = "Group"
-	case Symtabshndx:
+	case SHT_SYMTAB_SHNDX:
 		info.Type = "Symtabshndx"
-	case SNum:
+	case SHT_NUM:
 		info.Type = "Num"
-	case Gnu_hash:
+	case SHT_GNU_HASH:
 		info.Type = "GNU_hash"
-	case Gnu_verneed:
+	case SHT_GNU_verneed:
 		info.Type = "GNU_verneed"
-	case Gnu_versym:
+	case SHT_GNU_versym:
 		info.Type = "GNU_versym"
 	default:
 		info.Type = "Unknown"
@@ -105,7 +105,7 @@ func setSHtype(info SectionHeaderInfo, t SHType) SectionHeaderInfo {
 	return info
 }
 
-func ReadSectionHeaders(file []byte, shoff uint64, shnum uint16, shsize uint16) (SectionHeaderInfos, error) {
+func ReadSectionHeaders(file []byte, shoff Elf64_Off, shnum Elf64_Half, shsize Elf64_Half) (SectionHeaderInfos, error) {
 	var infos SectionHeaderInfos
 	eheader, err := ReadELFHeader(file)
 	if err != nil {
@@ -130,7 +130,7 @@ func ReadSectionHeaders(file []byte, shoff uint64, shnum uint16, shsize uint16) 
 		if err != nil {
 			return infos, err
 		}
-		info = setSHtype(info, SHType(sheader.Sh_type))
+		info = setSHType(info, SHType(sheader.Sh_type))
 
 		infos = append(infos, info)
 	}
