@@ -82,23 +82,23 @@ func setPType(info ProgramHeaderInfo, t PType) ProgramHeaderInfo {
 type PFlags uint32
 
 const (
-	X PFlags = 1
-	W PFlags = 2
-	R PFlags = 4
+	PF_X PFlags = 1
+	PF_W PFlags = 2
+	PF_R PFlags = 4
 )
 
 func setPFlags(info ProgramHeaderInfo, f PFlags) ProgramHeaderInfo {
-	if R&f != 0 {
+	if PF_R&f != 0 {
 		info.Flags += "Readable"
 	} else {
 		info.Flags += " "
 	}
-	if W&f != 0 {
+	if PF_W&f != 0 {
 		info.Flags += " Writable"
 	} else {
 		info.Flags += " "
 	}
-	if X&f != 0 {
+	if PF_X&f != 0 {
 		info.Flags += " Excutable"
 	} else {
 		info.Flags += " "

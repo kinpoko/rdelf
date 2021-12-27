@@ -10,7 +10,7 @@ import (
 type sectionHeader struct {
 	Sh_name      Elf64_Word  /* Section name (string tbl index) */
 	Sh_type      Elf64_Word  /* Section type */
-	Sh_flags     Elf64_Xword /* Section flags */
+	Sh_flags     Elf64_Xword /* Section info.Flagss */
 	Sh_addr      Elf64_Addr  /* Section virtual addr at execution */
 	Sh_offset    Elf64_Off   /* Section file offset */
 	Sh_size      Elf64_Xword /* Section size in bytes */
@@ -23,6 +23,7 @@ type sectionHeader struct {
 type SectionHeaderInfo struct {
 	Name      string
 	Type      string
+	Flags     string
 	Size      Elf64_Xword
 	EntrySize Elf64_Xword
 }
@@ -105,6 +106,90 @@ func setSHType(info SectionHeaderInfo, t SHType) SectionHeaderInfo {
 	return info
 }
 
+type SHFlags uint64
+
+const (
+	SHF_WRITE            SHFlags = (1 << 0)   /* Writable */
+	SHF_ALLOC            SHFlags = (1 << 1)   /* Occupies memory during execution */
+	SHF_EXECINSTR        SHFlags = (1 << 2)   /* Executable */
+	SHF_MERGE            SHFlags = (1 << 4)   /* Might be merged */
+	SHF_STRINGS          SHFlags = (1 << 5)   /* Contains nul-terminated strings */
+	SHF_INFO_LINK        SHFlags = (1 << 6)   /* `sh_info' contains SHT index */
+	SHF_LINK_ORDER       SHFlags = (1 << 7)   /* Preserve order after combining */
+	SHF_OS_NONCONFORMING SHFlags = (1 << 8)   /* Non-standard OS specific handling required */
+	SHF_GROUP            SHFlags = (1 << 9)   /* Section is member of a group.  */
+	SHF_TLS              SHFlags = (1 << 10)  /* Section hold thread-local data.  */
+	SHF_COMPRESSED       SHFlags = (1 << 11)  /* Section with compressed data. */
+	SHF_MASKOS           SHFlags = 0x0ff00000 /* OS-specific.  */
+	SHF_MASKPROC         SHFlags = 0xf0000000 /* Processor-specific */
+	SHF_ORDERED          SHFlags = (1 << 30)  /* Special ordering requirement (Solaris).  */
+	SHF_EXCLUDE          SHFlags = (1 << 31)  /* Section is excluded unless referenced or allocated (Solaris).*/
+)
+
+func setSHFlags(info SectionHeaderInfo, f SHFlags) SectionHeaderInfo {
+	if f&SHF_WRITE != 0 {
+		info.Flags += "W"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_ALLOC != 0 {
+		info.Flags += "A"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_EXECINSTR != 0 {
+		info.Flags += "X"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_MERGE != 0 {
+		info.Flags += "M"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_STRINGS != 0 {
+		info.Flags += "S"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_INFO_LINK != 0 {
+		info.Flags += "I"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_LINK_ORDER != 0 {
+		info.Flags += "L"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_OS_NONCONFORMING != 0 {
+		info.Flags += "O"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_GROUP != 0 {
+		info.Flags += "G"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_TLS != 0 {
+		info.Flags += "T"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_EXCLUDE != 0 {
+		info.Flags += "E"
+	} else {
+		info.Flags += " "
+	}
+	if f&SHF_COMPRESSED != 0 {
+		info.Flags += "C"
+	} else {
+		info.Flags += " "
+	}
+	return info
+}
+
 func ReadSectionHeaders(file []byte, shoff Elf64_Off, shnum Elf64_Half, shsize Elf64_Half) (SectionHeaderInfos, error) {
 	var infos SectionHeaderInfos
 	eheader, err := ReadELFHeader(file)
@@ -131,6 +216,7 @@ func ReadSectionHeaders(file []byte, shoff Elf64_Off, shnum Elf64_Half, shsize E
 			return infos, err
 		}
 		info = setSHType(info, SHType(sheader.Sh_type))
+		info = setSHFlags(info, SHFlags(sheader.Sh_flags))
 
 		infos = append(infos, info)
 	}

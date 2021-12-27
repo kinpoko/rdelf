@@ -90,6 +90,8 @@ var rootCmd = &cobra.Command{
 			for i, sh := range shs {
 				fmt.Printf("Section Headers[%d]:\n", i)
 				fmt.Println("Type: " + sh.Type)
+				fmt.Println("Flags: " + sh.Flags)
+				fmt.Print("\n")
 			}
 		}
 		return nil
