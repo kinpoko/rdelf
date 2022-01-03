@@ -91,6 +91,13 @@ var rootCmd = &cobra.Command{
 				fmt.Printf("Section Headers[%d]:\n", i)
 				fmt.Println("Type: " + sh.Type)
 				fmt.Println("Flags: " + sh.Flags)
+				fmt.Printf("Address: 0x%x\n", sh.Address)
+				fmt.Printf("Offset: 0x%x\n", sh.Offset)
+				fmt.Printf("Size: 0x%x\n", sh.Size)
+				fmt.Printf("Link: %d\n", sh.Link)
+				fmt.Printf("Info: %d\n", sh.Info)
+				fmt.Printf("Alignment: 0x%x\n", sh.Alignment)
+				fmt.Printf("Entry Size: 0x%x\n", sh.EntrySize)
 				fmt.Print("\n")
 			}
 		}

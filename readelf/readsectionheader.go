@@ -24,7 +24,12 @@ type SectionHeaderInfo struct {
 	Name      string
 	Type      string
 	Flags     string
+	Address   Elf64_Addr
+	Offset    Elf64_Off
 	Size      Elf64_Xword
+	Link      Elf64_Word
+	Info      Elf64_Word
+	Alignment Elf64_Xword
 	EntrySize Elf64_Xword
 }
 
@@ -217,6 +222,13 @@ func ReadSectionHeaders(file []byte, shoff Elf64_Off, shnum Elf64_Half, shsize E
 		}
 		info = setSHType(info, SHType(sheader.Sh_type))
 		info = setSHFlags(info, SHFlags(sheader.Sh_flags))
+		info.Address = sheader.Sh_addr
+		info.Offset = sheader.Sh_offset
+		info.Size = sheader.Sh_size
+		info.Link = sheader.Sh_link
+		info.Info = sheader.Sh_info
+		info.Alignment = sheader.Sh_addralign
+		info.EntrySize = sheader.Sh_entsize
 
 		infos = append(infos, info)
 	}
