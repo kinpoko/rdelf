@@ -12,7 +12,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "rdelf [file name]",
 	Short: "elf parser",
-	Long:  ``,
+	Long:  `A CLI application for parsing ELF headers.`,
 
 	Args: cobra.ExactArgs(1),
 
