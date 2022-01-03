@@ -21,16 +21,17 @@ type sectionHeader struct {
 }
 
 type SectionHeaderInfo struct {
-	Name      string
-	Type      string
-	Flags     string
-	Address   Elf64_Addr
-	Offset    Elf64_Off
-	Size      Elf64_Xword
-	Link      Elf64_Word
-	Info      Elf64_Word
-	Alignment Elf64_Xword
-	EntrySize Elf64_Xword
+	Name       Elf64_Word
+	NameString string
+	Type       string
+	Flags      string
+	Address    Elf64_Addr
+	Offset     Elf64_Off
+	Size       Elf64_Xword
+	Link       Elf64_Word
+	Info       Elf64_Word
+	Alignment  Elf64_Xword
+	EntrySize  Elf64_Xword
 }
 
 type SectionHeaderInfos []SectionHeaderInfo
@@ -220,6 +221,8 @@ func ReadSectionHeaders(file []byte, shoff Elf64_Off, shnum Elf64_Half, shsize E
 		if err != nil {
 			return infos, err
 		}
+
+		info.Name = sheader.Sh_name
 		info = setSHType(info, SHType(sheader.Sh_type))
 		info = setSHFlags(info, SHFlags(sheader.Sh_flags))
 		info.Address = sheader.Sh_addr
@@ -232,5 +235,24 @@ func ReadSectionHeaders(file []byte, shoff Elf64_Off, shnum Elf64_Half, shsize E
 
 		infos = append(infos, info)
 	}
+
+	for i, shinfo := range infos {
+
+		var stringTableIndex = int(eheader.StringTableIndex)
+		var stringTableOffset = infos[stringTableIndex].Offset
+
+		var stringTable = file[int(stringTableOffset)+int(shinfo.Name):]
+		var name []byte
+
+		for _, bc := range stringTable {
+			if bc == 0 {
+				infos[i].NameString = string(name)
+				break
+			}
+			name = append(name, bc)
+		}
+
+	}
+
 	return infos, nil
 }

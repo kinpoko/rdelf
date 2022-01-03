@@ -54,6 +54,7 @@ var rootCmd = &cobra.Command{
 			fmt.Printf("Start of Section headers: %d (bytes)\n", h.StartOfSHeader)
 			fmt.Printf("Number of Program headers: %d \n", h.NumOfPHeader)
 			fmt.Printf("Number of Section headers: %d \n", h.NumOfSHeader)
+			fmt.Printf("Section header string table index: %d \n", h.StringTableIndex)
 			fmt.Printf("\n")
 		}
 
@@ -89,6 +90,7 @@ var rootCmd = &cobra.Command{
 			}
 			for i, sh := range shs {
 				fmt.Printf("Section Headers[%d]:\n", i)
+				fmt.Println("Name: " + sh.NameString)
 				fmt.Println("Type: " + sh.Type)
 				fmt.Println("Flags: " + sh.Flags)
 				fmt.Printf("Address: 0x%x\n", sh.Address)

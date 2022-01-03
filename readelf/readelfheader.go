@@ -38,19 +38,20 @@ type ElfHeader struct {
 }
 
 type ElfHeaderInfo struct {
-	Magic          [16]uint8
-	Class          string
-	Data           string
-	Version        uint8
-	Type           string
-	Machine        string
-	EntryPoint     Elf64_Addr
-	StartOfPHeader Elf64_Off
-	StartOfSHeader Elf64_Off
-	SizeOfPHeader  Elf64_Half
-	NumOfPHeader   Elf64_Half
-	SizeOfSHeader  Elf64_Half
-	NumOfSHeader   Elf64_Half
+	Magic            [16]uint8
+	Class            string
+	Data             string
+	Version          uint8
+	Type             string
+	Machine          string
+	EntryPoint       Elf64_Addr
+	StartOfPHeader   Elf64_Off
+	StartOfSHeader   Elf64_Off
+	SizeOfPHeader    Elf64_Half
+	NumOfPHeader     Elf64_Half
+	SizeOfSHeader    Elf64_Half
+	NumOfSHeader     Elf64_Half
+	StringTableIndex Elf64_Half
 }
 
 type ElfClass int
@@ -203,6 +204,7 @@ func ReadELFHeader(file []byte) (ElfHeaderInfo, error) {
 	info.NumOfPHeader = header.E_phnum
 	info.SizeOfSHeader = header.E_shentsize
 	info.NumOfSHeader = header.E_shnum
+	info.StringTableIndex = header.E_shstrndx
 	return info, nil
 
 }
