@@ -2,13 +2,13 @@
 
 A CLI application for parsing ELF headers written in Go.
 
-# Install
+## Install
 
 ```bash
 go install github.com/kinpoko/rdelf@latest
 ```
 
-# Usage
+## Usage
 
 ```bash
 rdelf -h
